@@ -126,7 +126,7 @@ public class Contents {
 	public synchronized void addDirectory( final String path) {
 		addDirectory( path, -1);
 	}
-	
+
 	/**
 	 * Adds a directory entry to the archive with the default permissions of 644.
 	 *
@@ -136,7 +136,7 @@ public class Contents {
 	public synchronized void addDirectory( final String path, final Directive directive) {
 		addDirectory( path, -1, directive, null, null);
 	}
-	
+
 	/**
 	 * Adds a directory entry to the archive with the specified permissions.
 	 *
@@ -235,7 +235,7 @@ public class Contents {
 	public void addFile( final String path, final File source, int permissions, int dirmode) throws FileNotFoundException {
 		addFile(path, source, permissions, null, null, null, dirmode);
 	}
-	
+
 	/**
 	 * Adds a file entry to the archive with the specified permissions.
 	 *
@@ -322,7 +322,7 @@ public class Contents {
 		}
 		headers.add( header);
 		sources.put( header, source);
-		
+
 		if ( directive != null) header.setFlags( directive.flag());
 	}
 
@@ -350,12 +350,12 @@ public class Contents {
 		if ( permissions != -1) header.setPermissions( permissions);
 		headers.add( header);
 		sources.put( header, source);
-		
+
 		if ( directive != null) header.setFlags( directive.flag());
 	}
 
 	/**
-	 * Adds entries for parent directories of this file, so that they may be cleaned up when 
+	 * Adds entries for parent directories of this file, so that they may be cleaned up when
 	 * removing the package.
 	 */
 	protected synchronized void addParents( final File file, final int permissions, final String uname, final String gname ) {
@@ -626,8 +626,8 @@ public class Contents {
 	/**
 	 * Gets the inodes header values.
 	 */
-	public int[] getInodes() {
-		int[] array = new int[ headers.size()];
+	public long[] getInodes() {
+		long[] array = new long[ headers.size()];
 		int x = 0;
 		for ( CpioHeader header : headers) array[ x++] = header.getInode();
 		return array;
@@ -671,7 +671,7 @@ public class Contents {
 	protected static void listParents( final List< String> parents, final File file) {
 		final File parent = file.getParentFile();
 		if ( parent == null) return;
-		
+
 		final String path = normalizePath( parent.getPath());
 		if ( BUILTIN.contains( path)) return;
 

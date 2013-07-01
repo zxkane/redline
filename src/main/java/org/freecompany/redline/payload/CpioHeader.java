@@ -25,7 +25,7 @@ import static org.freecompany.redline.Util.normalizePath;
  */
 public class CpioHeader {
     private final Logger LOGGER = LoggerFactory.getLogger(CpioHeader.class);
-    
+
 	public static final int DEFAULT_FILE_PERMISSION = 0644;
 	public static final int DEFAULT_DIRECTORY_PERMISSION = 0755;
 	public static final String DEFAULT_USERNAME = "root";
@@ -38,14 +38,14 @@ public class CpioHeader {
 	public static final int FILE = 8;
 	public static final int SYMLINK = 10;
 	public static final int SOCKET = 12;
-	
+
 	protected static final int CPIO_HEADER = 110;
 	protected static final String MAGIC = "070701";
 	protected static final String TRAILER = "TRAILER!!!";
 
 	protected Charset charset = Charset.forName( "ASCII");
 
-	protected int inode;
+	protected long inode;
 	protected int type;
 	protected int permissions = DEFAULT_FILE_PERMISSION;
 	protected int uid;
@@ -101,7 +101,7 @@ public class CpioHeader {
 	public int getDevMajor() { return devMajor; }
 	public int getDevMinor() { return devMinor; }
 	public int getMtime() { return ( int) ( mtime / 1000L) ; }
-	public int getInode() { return inode; }
+	public long getInode() { return inode; }
 	public String getName() { return name; }
 	public int getFlags() { return flags; }
 
@@ -148,12 +148,16 @@ public class CpioHeader {
 		return charset.encode( pad( Integer.toHexString( data), 8));
 	}
 
+	protected ByteBuffer writeEight(long data) {
+		return charset.encode(pad(Long.toHexString(data), 8));
+	}
+
 	protected CharSequence readSix( CharBuffer buffer) {
 		return readChars( buffer, 6);
 	}
 
-	protected int readEight( CharBuffer buffer) {
-		return Integer.parseInt( readChars( buffer, 8).toString(), 16);
+	protected Long readEight( CharBuffer buffer) {
+		return Long.parseLong( readChars( buffer, 8).toString(), 16);
 	}
 
 	protected CharSequence readChars( CharBuffer buffer, int length) {
@@ -192,22 +196,22 @@ public class CpioHeader {
 		final CharSequence magic = readSix( buffer);
 		if ( !MAGIC.equals(magic.toString())) throw new IllegalStateException( "Invalid magic number '" + magic + "' of length '" + magic.length() + "'.");
 		inode = readEight( buffer);
-		
-		final int mode = readEight( buffer);
+
+		final int mode = readEight( buffer).intValue();
 		permissions = mode & 07777;
 		type = mode >>> 12;
-		
-		uid = readEight( buffer);
-		gid = readEight( buffer);
-		nlink = readEight( buffer);
+
+		uid = readEight( buffer).intValue();
+		gid = readEight( buffer).intValue();
+		nlink = readEight( buffer).intValue();
 		mtime = 1000L * readEight( buffer);
-		filesize = readEight( buffer);
-		devMajor = readEight( buffer);
-		devMinor = readEight( buffer);
-		rdevMajor = readEight( buffer);
-		rdevMinor = readEight( buffer);
-		int namesize = readEight( buffer);
-		checksum = readEight( buffer);
+		filesize = readEight( buffer).intValue();
+		devMajor = readEight( buffer).intValue();
+		devMinor = readEight( buffer).intValue();
+		rdevMajor = readEight( buffer).intValue();
+		rdevMinor = readEight( buffer).intValue();
+		int namesize = readEight( buffer).intValue();
+		checksum = readEight( buffer).intValue();
 		total += CPIO_HEADER;
 
 		name = charset.decode( Util.fill( channel, namesize - 1)).toString();
